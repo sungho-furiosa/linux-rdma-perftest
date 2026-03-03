@@ -21,6 +21,7 @@
 #include "mlu_memory.h"
 #include "opencl_memory.h"
 #include "dm_memory.h"
+#include "rngd_memory.h"
 #include<math.h>
 #ifdef HAVE_RO
 #include <stdbool.h>
@@ -571,6 +572,8 @@ static void usage(const char *argv0, VerbType verb, TestType tst, int connection
 		printf(" Use an mmap'd file as the buffer for testing P2P transfers.\n");
 		printf("      --mmap-offset=<offset> ");
 		printf(" Use an mmap'd file as the buffer for testing P2P transfers.\n");
+		printf("      --use_rngd_dmabuf=<device_id>");
+		printf(" Use RNGD NPU BAR memory with dmabuf (e.g., 0 for npu0bar4).\n");
 	}
 
 	if (tst == BW) {
@@ -958,6 +961,8 @@ static void init_perftest_params(struct perftest_parameters *user_param)
 	user_param->gpu_touch		= GPU_NO_TOUCH;
 	user_param->mmap_file		= NULL;
 	user_param->mmap_offset		= 0;
+	user_param->rngd_device_id	= 0;
+	user_param->use_rngd_dmabuf	= 0;
 	user_param->iters_per_port[0]	= 0;
 	user_param->iters_per_port[1]	= 0;
 	user_param->wait_destroy	= 0;
@@ -2658,6 +2663,7 @@ int parser(struct perftest_parameters *user_param,char *argv[], int argc)
 	static int disable_pcir_flag = 0;
 	static int mmap_file_flag = 0;
 	static int mmap_offset_flag = 0;
+	static int use_rngd_dmabuf_flag = 0;
 	static int ipv6_flag = 0;
 	static int ipv6_addr_flag = 0;
 	static int raw_ipv6_flag = 0;
@@ -2850,6 +2856,7 @@ int parser(struct perftest_parameters *user_param,char *argv[], int argc)
 			{ .name = "gpu_touch",		.has_arg = 1, .flag = &gpu_touch_flag, .val = 1},
 			{ .name = "mmap",		.has_arg = 1, .flag = &mmap_file_flag, .val = 1},
 			{ .name = "mmap-offset",	.has_arg = 1, .flag = &mmap_offset_flag, .val = 1},
+			{ .name = "use_rngd_dmabuf",	.has_arg = 1, .flag = &use_rngd_dmabuf_flag, .val = 1},
 			{ .name = "ipv6",		.has_arg = 0, .flag = &ipv6_flag, .val = 1},
 			{ .name = "ipv6-addr",		.has_arg = 0, .flag = &ipv6_addr_flag, .val = 1},
 			#ifdef HAVE_IPV6
@@ -3507,6 +3514,13 @@ int parser(struct perftest_parameters *user_param,char *argv[], int argc)
 				if (mmap_offset_flag) {
 					CHECK_VALUE(user_param->mmap_offset,unsigned long,"mmap offset",not_int_ptr);
 					mmap_offset_flag = 0;
+				}
+				if (use_rngd_dmabuf_flag) {
+					CHECK_VALUE(user_param->rngd_device_id,int,"rngd device id",not_int_ptr);
+					user_param->use_rngd_dmabuf = 1;
+					user_param->memory_type = MEMORY_RNGD;
+					user_param->memory_create = rngd_memory_create;
+					use_rngd_dmabuf_flag = 0;
 				}
 				if (dlid_flag) {
 					CHECK_VALUE(user_param->dlid,uint16_t,"dlid",not_int_ptr);

@@ -458,7 +458,8 @@ enum memory_type {
 	MEMORY_HL,
 	MEMORY_MLU,
 	MEMORY_OPENCL,
-	MEMORY_DM
+	MEMORY_DM,
+	MEMORY_RNGD
 };
 
 enum cuda_mem_type {
@@ -621,6 +622,8 @@ struct perftest_parameters {
 	int				use_ib_dm_dmabuf;
 	char				*mmap_file;
 	unsigned long			mmap_offset;
+	int				rngd_device_id;
+	int				use_rngd_dmabuf;
 	/* New test params format pilot. will be used in all flags soon,. */
 	enum ctx_test_method 		test_method;
 	enum ibv_transport_type 	transport_type;
