@@ -17,7 +17,27 @@
 #include <unistd.h>
 #include "rngd_memory.h"
 #include "perftest_parameters.h"
-#include "npu_bar_uapi.h"
+
+#define NPU_BAR_IOC_MAGIC 'N'
+
+struct npu_bar_info {
+    uint64_t bar_phy_addr; // Physical address of BAR memory
+    uint64_t bar_size; // Size of BAR memory
+} __attribute__((packed));
+
+#define NPU_BAR4_RESERVED_SIZE (256ULL * 1024 * 1024) // 256MB
+#define NPU_BAR4_AVAILABLE_SIZE (48ULL * 1024 * 1024 * 1024 - (256 * 1024 * 1024) - NPU_BAR4_RESERVED_SIZE) // 48GB - 256MB - 256MB
+
+struct npu_dmabuf_region {
+    uint64_t offset; // Offset of DMA Buffer
+    uint64_t size; // Size of DMA Buffer
+    int fd; // File descriptor for the DMA Buffer
+} __attribute__((packed));
+
+// Get Bar memory information (physical address, size)
+#define NPU_BAR_GET_INFO			_IOWR(NPU_BAR_IOC_MAGIC, 0x00, struct npu_bar_info)
+// Exports the DMABUF of the bar memory
+#define NPU_BAR_EXPORT_DMABUF           _IOWR(NPU_BAR_IOC_MAGIC, 0x01, struct npu_dmabuf_region)
 
 #define RNGD_DEVICE_PATH_FORMAT "/dev/rngd/npu%dbar4"
 #define RNGD_DEVICE_PATH_MAX 32
