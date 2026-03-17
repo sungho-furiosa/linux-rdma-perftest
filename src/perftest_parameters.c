@@ -574,6 +574,8 @@ static void usage(const char *argv0, VerbType verb, TestType tst, int connection
 		printf(" Use an mmap'd file as the buffer for testing P2P transfers.\n");
 		printf("      --use_rngd_dmabuf=<device_id>");
 		printf(" Use RNGD NPU BAR memory with dmabuf (e.g., 0 for npu0bar4).\n");
+		printf("      --use_rngd_dmabuf_offset=<offset>");
+		printf(" Use RNGD NPU BAR memory with dmabuf offset (e.g., 0 for 65536).\n");
 	}
 
 	if (tst == BW) {
@@ -963,6 +965,7 @@ static void init_perftest_params(struct perftest_parameters *user_param)
 	user_param->mmap_offset		= 0;
 	user_param->rngd_device_id	= 0;
 	user_param->use_rngd_dmabuf	= 0;
+	user_param->use_rngd_dmabuf_offset	= 0;
 	user_param->iters_per_port[0]	= 0;
 	user_param->iters_per_port[1]	= 0;
 	user_param->wait_destroy	= 0;
@@ -2664,6 +2667,7 @@ int parser(struct perftest_parameters *user_param,char *argv[], int argc)
 	static int mmap_file_flag = 0;
 	static int mmap_offset_flag = 0;
 	static int use_rngd_dmabuf_flag = 0;
+	static int use_rngd_dmabuf_offset = 0;
 	static int ipv6_flag = 0;
 	static int ipv6_addr_flag = 0;
 	static int raw_ipv6_flag = 0;
@@ -2857,6 +2861,7 @@ int parser(struct perftest_parameters *user_param,char *argv[], int argc)
 			{ .name = "mmap",		.has_arg = 1, .flag = &mmap_file_flag, .val = 1},
 			{ .name = "mmap-offset",	.has_arg = 1, .flag = &mmap_offset_flag, .val = 1},
 			{ .name = "use_rngd_dmabuf",	.has_arg = 1, .flag = &use_rngd_dmabuf_flag, .val = 1},
+			{ .name = "use_rngd_dmabuf_offset",	.has_arg = 1, .flag = &use_rngd_dmabuf_offset, .val = 1},
 			{ .name = "ipv6",		.has_arg = 0, .flag = &ipv6_flag, .val = 1},
 			{ .name = "ipv6-addr",		.has_arg = 0, .flag = &ipv6_addr_flag, .val = 1},
 			#ifdef HAVE_IPV6
@@ -3521,6 +3526,10 @@ int parser(struct perftest_parameters *user_param,char *argv[], int argc)
 					user_param->memory_type = MEMORY_RNGD;
 					user_param->memory_create = rngd_memory_create;
 					use_rngd_dmabuf_flag = 0;
+				}
+				if (use_rngd_dmabuf_offset) {
+					CHECK_VALUE(user_param->use_rngd_dmabuf_offset, unsigned long,"use rngd dmabuf offset",not_int_ptr);
+					use_rngd_dmabuf_offset = 0;
 				}
 				if (dlid_flag) {
 					CHECK_VALUE(user_param->dlid,uint16_t,"dlid",not_int_ptr);

@@ -40,7 +40,7 @@ static int rngd_memory_init(struct memory_ctx *ctx)
 			rngd_ctx->device_path, strerror(errno));
 		return FAILURE;
 	}
-	rngd_ctx->offset = NPU_BAR4_RESERVED_SIZE;
+	rngd_ctx->offset += NPU_BAR4_RESERVED_SIZE;
 
 	return SUCCESS;
 }
@@ -101,7 +101,7 @@ static int rngd_memory_allocate_buffer(struct memory_ctx *ctx, int alignment, ui
 	*dmabuf_fd = npu_dmabuf_region.fd;
 	*dmabuf_offset = 0;
 	*addr = mapped_addr;
-	*can_init = true;
+	*can_init = false;
 
 	printf("RNGD memory allocated: addr=%p, offset=%lu, mapped_size=%zu\n",
 	       mapped_addr, offset, size);
@@ -141,6 +141,7 @@ struct memory_ctx *rngd_memory_create(struct perftest_parameters *params)
 	/* Construct device path from device ID */
 	snprintf(ctx->device_path, RNGD_DEVICE_PATH_MAX, RNGD_DEVICE_PATH_FORMAT, params->rngd_device_id);
 	ctx->bar_fd = -1;
+	ctx->offset = params->use_rngd_dmabuf_offset;
 
 	return &ctx->base;
 }

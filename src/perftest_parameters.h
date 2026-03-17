@@ -624,6 +624,7 @@ struct perftest_parameters {
 	unsigned long			mmap_offset;
 	int				rngd_device_id;
 	int				use_rngd_dmabuf;
+	unsigned long			use_rngd_dmabuf_offset;
 	/* New test params format pilot. will be used in all flags soon,. */
 	enum ctx_test_method 		test_method;
 	enum ibv_transport_type 	transport_type;
